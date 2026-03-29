@@ -10,6 +10,12 @@
 slprj/
 work/
 codegen/
+cache/
+
+# Simulation outputs
+*.mat
+*.log
+*.csv
 
 # OS / editor
 Thumbs.db
