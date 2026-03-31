@@ -20,6 +20,7 @@ cache/
 # OS / editor
 Thumbs.db
 .DS_Store
+.vscode/
 
 # history
 .history/*

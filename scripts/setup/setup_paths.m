@@ -11,7 +11,9 @@ addpath(genpath(fullfile(projectRoot, 'src', 'control')));
 addpath(genpath(fullfile(projectRoot, 'src', 'disturbance')));
 addpath(genpath(fullfile(projectRoot, 'src', 'utils')));
 addpath(genpath(fullfile(projectRoot, 'scripts', 'analysis')));
+addpath(genpath(fullfile(projectRoot, 'scripts', 'visualization')));
 addpath(genpath(fullfile(projectRoot, 'models', 'libraries', 'function')));
 
 disp('Satellite project paths configured.');
 end
+
