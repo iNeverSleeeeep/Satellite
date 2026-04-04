@@ -1,4 +1,4 @@
-﻿function test_environment_models()
+function test_environment_models()
 %TEST_ENVIRONMENT_MODELS 环境与扰动模型的基础冒烟测试。
 
 setup_paths();
@@ -10,7 +10,7 @@ V_i = [0; 7.5e3; 0];
 DCM_bi = eye(3);
 t = 120.0;
 sunVector_i = calc_sun_vector_i(t, env);
-B_i = calc_magnetic_field_i(X_i, env);
+B_i = calc_magnetic_field_i(X_i, env, t);
 
 drag_b = calc_atmospheric_drag_b(X_i, V_i, DCM_bi, spacecraft, env);
 srp_b = calc_solar_radiation_pressure_b(sunVector_i, DCM_bi, spacecraft, env);
