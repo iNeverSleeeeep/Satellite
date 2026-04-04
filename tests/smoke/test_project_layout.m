@@ -3,7 +3,11 @@ function test_project_layout()
 
 setup_paths();
 cfg = default_sim_config();
+gnc = gnc_overview();
 
 assert(isstruct(cfg), 'default_sim_config must return a struct.');
 assert(isfield(cfg, 'stopTime'), 'Simulation config must define stopTime.');
+assert(isfield(gnc, 'sensorSuite'), 'GNC config must define a sensor suite.');
+assert(isfolder(fullfile(project_root(), 'src', 'sensors')), 'src/sensors folder must exist.');
+assert(isfolder(fullfile(project_root(), 'src', 'observers')), 'src/observers folder must exist.');
 end
