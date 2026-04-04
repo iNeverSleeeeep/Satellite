@@ -7,9 +7,11 @@ create_bus_objects();
 env = environment_config();
 simConfig = default_sim_config();
 spacecraft = spacecraft_params();
+gnc = gnc_overview();
 
 assignin('base', 'env', env);
 assignin('base', 'simConfig', simConfig);
 assignin('base', 'spacecraft', spacecraft);
+assignin('base', 'gnc', gnc);
 disp('Satellite simulation project initialized.');
 end
