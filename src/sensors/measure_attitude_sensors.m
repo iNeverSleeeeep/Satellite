@@ -27,7 +27,7 @@ if nargin < 6
 end
 
 sunVector_i = calc_sun_vector_i(t, env);
-magneticField_i = calc_magnetic_field_i(X_i, env);
+magneticField_i = calc_magnetic_field_i(X_i, env, t);
 
 measurements.t = t;
 measurements.reference.sun_i = local_unit_vector(sunVector_i);
