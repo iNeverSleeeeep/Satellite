@@ -1,96 +1,124 @@
-﻿# 卫星仿真项目
+# 卫星仿真项目
 
-本仓库按工程化的 MATLAB/Simulink 卫星仿真项目方式组织，方便后续继续扩展动力学、环境、GNC、控制与分析流程。
+本仓库是一个按 MATLAB / Simulink 工程方式组织的卫星仿真原型项目，当前重点已经从纯目录骨架扩展到“环境参考模型 + 传感器测量链 + 姿态确定 / 姿态估计”这一条可运行的主线。
+
+## 当前工程现状
+
+当前仓库已经具备以下基础能力：
+
+- 卫星六自由度仿真基础
+  - 已具备卫星平动 + 转动的六自由度仿真基础结构
+  - 可作为环境、传感器、姿态确定与控制算法的被控对象基础
+- 环境参考模型
+  - 太阳参考方向 `sun_i`
+  - 地磁参考方向 `mag_i`
+  - 空气阻力、太阳辐射压、重力梯度、磁扰动力矩等基础环境/扰动模型
+- 姿态传感器链
+  - 太阳敏感器理想测量模式
+  - 粗太阳敏感器阵列原始值模拟与太阳方向重建
+  - 磁力计理想测量模式
+  - 三轴磁力计原始值模拟与标定恢复
+- 姿态确定与估计
+  - 基于太阳方向和地磁方向的 TRIAD 直接定姿
+  - 基于四元数的姿态 EKF
+  - 传感器测量打包与姿态估计封装接口
+- 工程化支撑
+  - 路径初始化脚本
+  - baseline 配置脚本
+  - smoke tests
+  - Godot 可视化演示入口
+
+## 当前重点模块
+
+目前最完整、最适合继续往下扩展的是姿态估计相关链路：
+
+- 环境参考模型
+  - [calc_sun_vector_i.m](src/environment/calc_sun_vector_i.m)
+  - [calc_magnetic_field_i.m](src/environment/calc_magnetic_field_i.m)
+  - [environment_config.m](src/environment/environment_config.m)
+- 传感器模型
+  - [measure_sun_sensor.m](src/sensors/measure_sun_sensor.m)
+  - [reconstruct_sun_vector_from_css.m](src/sensors/reconstruct_sun_vector_from_css.m)
+  - [measure_magnetometer.m](src/sensors/measure_magnetometer.m)
+  - [calibrate_magnetometer_raw.m](src/sensors/calibrate_magnetometer_raw.m)
+  - [measure_attitude_sensors.m](src/sensors/measure_attitude_sensors.m)
+- 观测器与姿态确定
+  - [solve_attitude_from_sun_mag.m](src/observers/solve_attitude_from_sun_mag.m)
+  - [triad_attitude_init.m](src/observers/triad_attitude_init.m)
+  - [attitude_ekf_step.m](src/observers/attitude_ekf_step.m)
+  - [estimate_attitude_from_sensors.m](src/observers/estimate_attitude_from_sensors.m)
+
+## 环境模型模式
+
+当前太阳参考方向和地磁参考方向支持多种模式切换，统一由 [environment_config.m](src/environment/environment_config.m) 配置：
+
+- `simple`
+  - 用于快速原型验证
+- `engineering`
+  - 用于更正式的工程近似建模
+- `high_fidelity`
+  - 预留给更高保真模型
+  - 优先调用 MATLAB/Aerospace Toolbox 或用户自定义函数句柄
+  - 若缺少依赖会显式报错，不会静默退化
 
 ## 目录结构
 
 - `models/plant/`：卫星本体动力学与被控对象模型
 - `models/mission/`：任务级场景模型、顶层仿真装配与工况变体
 - `models/libraries/`：可复用的 Simulink 模块库和公共子系统
-- `src/parameters/`：卫星、轨道、传感器、执行机构等参数定义
-- `src/environment/`：重力、气动、磁场、太阳辐射压等环境模型
-- `src/gnc/`：制导、导航、估计与姿态确定相关算法
-- `src/control/`：姿态控制、轨道控制等控制律实现
-- `src/disturbance/`：扰动力与扰动力矩模型
+- `src/parameters/`：卫星、轨道、仿真参数与总线定义
+- `src/environment/`：太阳、磁场、重力、气动等环境参考与扰动模型
+- `src/gnc/`：姿态表示、GNC 配置与相关基础算法
+- `src/sensors/`：太阳敏感器、磁力计及原始值重建/标定逻辑
+- `src/observers/`：TRIAD、EKF 等姿态确定与状态估计算法
+- `src/control/`：控制律相关代码
+- `src/disturbance/`：扰动预算与相关占位/扩展接口
 - `src/utils/`：通用 MATLAB 工具函数
 - `scripts/setup/`：工程初始化与路径配置脚本
-- `scripts/analysis/`：仿真后处理、绘图和结果分析脚本
-- `config/`：仿真配置、求解器配置和场景模板
-- `data/input/`：外部输入数据，如星历、参考轨迹和常量表
-- `data/reference/`：基准数据、对比数据和验证参考
-- `results/figures/`：导出的图像结果
-- `results/logs/`：仿真日志与输出数据
-- `tests/smoke/`：基础冒烟测试和最小回归检查
-- `docs/`：设计说明、接口说明和建模约定
+- `scripts/analysis/`：分析、演示与结果检查脚本
+- `tests/smoke/`：基础冒烟测试
+- `docs/`：架构说明、约定文档与其他设计说明
 
-## 当前模型
+## 快速开始
 
-- `models/plant/satellite.slx`
-- `models/plant/Spacecraft_Dynamics.slx`
+### 1. 初始化工程
 
-## 建议使用方式
-
-1. 打开 MATLAB 后先运行 `scripts/setup/setup_paths.m`
-2. 将可调参数尽量集中放在 `src/parameters/`
-3. 将不同任务场景和工况变体放在 `models/mission/`
-4. 将仿真生成结果统一输出到 `results/`，避免根目录堆积临时文件
-
-## 命名约定
-
-为避免坐标系、姿态方向和变量含义混淆，建议在本项目中统一采用以下命名规则。
-
-### 坐标系缩写
-
-- `i`：惯性系
-- `b`：星体系
-- `f`：地固系
-
-### 方向余弦矩阵
-
-本项目推荐采用“目标坐标系在前，原坐标系在后”的命名方式：
-
-- `DCM_bi`：将惯性系向量转换到体系
-- `DCM_ib`：将体系向量转换到惯性系
-- `DCM_if`：将地固系向量转换到惯性系
-- `DCM_bf`：将地固系向量转换到体系
-
-对应关系示例：
+在 MATLAB 中运行：
 
 ```matlab
-v_b = DCM_bi * v_i;
-v_i = DCM_ib * v_b;
-v_b = DCM_bf * v_f;
+run('scripts/setup/setup_paths.m');
+init_project;
 ```
 
-### 四元数
+### 2. 查看基础姿态 EKF 演示
 
-四元数建议和方向余弦矩阵保持同一方向定义：
+```matlab
+run_attitude_ekf_demo;
+```
 
-- `q_bi`：表示从惯性系到体系的姿态四元数
-- `q_bi_0` 或 `q_b0`：初始姿态四元数
+### 3. 运行基础环境测试
 
-如果 `q2dcm(q_bi)` 输出的是惯性系到体系的矩阵，则可直接得到 `DCM_bi`。
+```matlab
+test_environment_models;
+```
 
-### 角速度与角加速度
+### 4. 运行姿态估计测试
 
-角速度建议默认表示“星体系相对惯性系的角速度，且分量在体系表达”：
+```matlab
+test_attitude_estimation;
+```
 
-- `omega_b`：体系角速度
-- `omega_dot_b`：体系角加速度
-- `omega_b0`：初始体系角速度
+## 当前已知边界
 
-如果后续模型中会同时出现多种相对角速度，可使用更完整的写法，例如 `omega_bi_b`，但不建议在当前阶段将常用变量命名得过长。
+当前项目仍然属于“工程原型 + 结构化扩展阶段”，还不是完整任务级飞行软件。主要边界包括：
 
-### 平动状态
+- `high_fidelity` 模式依赖 MATLAB/Aerospace Toolbox 或用户自定义高保真函数
+- Simulink 顶层模型和这批 MATLAB 算法函数仍在逐步深度集成
+- 一些控制、任务级场景和执行机构模型仍以骨架/占位为主
+- 当前 smoke test 覆盖的是主链路基础正确性，不代表完整数值验证已完成
 
-平动主状态如果在惯性系积分，建议统一命名为：
+## 文档
 
-- `X_i`：惯性系位置
-- `V_i`：惯性系速度
-- `A_i`：惯性系加速度
-
-如果需要同时输出地固系状态，可写为：
-
-- `X_f`
-- `V_f`
-- `A_f`
+- 架构说明：[docs/architecture.md](docs/architecture.md)
+- 建模与命名约定：[docs/conventions.md](docs/conventions.md)
+- Godot 可视化说明：[docs/godot_live_visualization.md](docs/godot_live_visualization.md)
