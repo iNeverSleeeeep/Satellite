@@ -6,7 +6,7 @@ function actuatorConfig = default_actuator_config()
 %   2. physics : 更接近星上执行链路的物理模型，用于评估真实可实现性。
 %
 % 当前实现策略：
-%   - 飞轮：已提供 ideal 与 physics 两种模型。
+%   - 飞轮：已提供 ideal 与 physics 两种模型，并带明确的电流内环。
 %   - 磁力矩器：已提供 ideal 与 physics 两种模型。
 %   - 推力器：先保留 ideal 行为，同时补齐 physics 模式开关和参数骨架。
 
@@ -24,6 +24,11 @@ actuatorConfig.reactionWheel.physics.maxWheelSpeedRadS = [6000; 6000; 6000] .* (
 actuatorConfig.reactionWheel.physics.initialWheelSpeedRadS = [0.0; 0.0; 0.0];
 actuatorConfig.reactionWheel.physics.motorTorqueConstantNmPerA = [5e-3; 5e-3; 5e-3];
 actuatorConfig.reactionWheel.physics.maxMotorCurrentA = [1.2; 1.2; 1.2];
+actuatorConfig.reactionWheel.physics.motorResistanceOhm = [4.0; 4.0; 4.0];
+actuatorConfig.reactionWheel.physics.motorInductanceH = [8e-3; 8e-3; 8e-3];
+actuatorConfig.reactionWheel.physics.driveVoltageV = [12.0; 12.0; 12.0];
+actuatorConfig.reactionWheel.physics.currentControllerKp = [6.0; 6.0; 6.0];
+actuatorConfig.reactionWheel.physics.currentControllerKi = [40.0; 40.0; 40.0];
 actuatorConfig.reactionWheel.physics.viscousFrictionNmPerRadS = [2e-6; 2e-6; 2e-6];
 actuatorConfig.reactionWheel.physics.coulombFrictionNm = [3e-5; 3e-5; 3e-5];
 actuatorConfig.reactionWheel.physics.driveTimeConstantS = 0.02;
@@ -34,13 +39,6 @@ actuatorConfig.magnetorquer.model = 'physics';
 actuatorConfig.magnetorquer.maxDipoleAm2 = [0.25; 0.25; 0.25];
 actuatorConfig.magnetorquer.timeConstantS = 0.10;
 actuatorConfig.magnetorquer.minMagneticFieldNormT = 1e-8;
-% 物理参数说明：
-%   maxCoilCurrentA     : 线圈最大允许电流。
-%   dipolePerAmpAm2     : 单位电流产生的磁偶极矩常数。
-%   coilResistanceOhm   : 线圈电阻。
-%   coilInductanceH     : 线圈电感。
-%   driveVoltageV       : 驱动电源/驱动器可提供的最大电压。
-%   currentControllerGain : 电流闭环的比例增益，用于把磁矩需求转成驱动电压。
 actuatorConfig.magnetorquer.physics.maxCoilCurrentA = [0.20; 0.20; 0.20];
 actuatorConfig.magnetorquer.physics.dipolePerAmpAm2 = [1.25; 1.25; 1.25];
 actuatorConfig.magnetorquer.physics.coilResistanceOhm = [8.0; 8.0; 8.0];

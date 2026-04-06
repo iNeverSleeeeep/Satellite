@@ -8,7 +8,9 @@ cfg = gnc.actuators;
 cfg.reactionWheel.timeConstantS = 0.0;
 cfg.magnetorquer.timeConstantS = 0.0;
 cfg.thruster.timeConstantS = 0.0;
-cfg.reactionWheel.physics.driveTimeConstantS = 0.0;
+cfg.reactionWheel.physics.currentControllerKi = [0.0; 0.0; 0.0];
+cfg.reactionWheel.physics.driveVoltageV = [100.0; 100.0; 100.0];
+cfg.thruster.model = 'physics';
 
 state = init_actuator_state(cfg);
 dt = 0.1;
@@ -17,10 +19,14 @@ dt = 0.1;
 assert(strcmp(smallOutput.selectedActuator, 'reaction-wheel'), 'Small torque commands should default to reaction wheel.');
 assert(norm(smallOutput.reactionWheel.actualTorque_b) > 0.0, 'Reaction wheel should produce non-zero torque for small commands.');
 assert(strcmp(smallOutput.reactionWheel.model, cfg.reactionWheel.model), 'Reaction wheel model selection should be reflected in the output.');
+assert(any(abs(smallOutput.reactionWheel.motorCurrentA) > 0.0), 'Reaction wheel inner current loop should produce motor current.');
+assert(any(abs(smallOutput.reactionWheel.driveVoltageV) > 0.0), 'Reaction wheel inner current loop should produce drive voltage.');
 
 [largeOutput, state] = actuator_step([2e-2; 0.0; 0.0], cfg, state, dt, struct());
 assert(strcmp(largeOutput.selectedActuator, 'thruster'), 'Large torque commands should default to thruster.');
-assert(abs(largeOutput.thruster.actualTorque_b(1)) >= cfg.thruster.minPulseTorqueNm(1), 'Thruster should produce quantized output torque.');
+assert(strcmp(largeOutput.thruster.model, 'physics'), 'Thruster model selection should be reflected in the output.');
+assert(abs(largeOutput.thruster.quantizedTorque_b(1)) >= cfg.thruster.minPulseTorqueNm(1), 'Thruster inner loop should quantize pulse torque.');
+assert(abs(largeOutput.thruster.gateTorque_b(1)) > 0, 'Thruster inner loop should gate a non-zero torque after valve logic.');
 
 state.reactionWheel.momentumNms = 0.95 .* cfg.reactionWheel.maxMomentumNms;
 magneticField_b = [0.0; 0.0; 3.5e-5];
@@ -34,8 +40,10 @@ assert(norm(magOutput.netTorque_b) > 0.0, 'Actuator suite should produce non-zer
 cfgIdeal = cfg;
 cfgIdeal.reactionWheel.model = 'ideal';
 cfgIdeal.magnetorquer.model = 'ideal';
+cfgIdeal.thruster.model = 'ideal';
 stateIdeal = init_actuator_state(cfgIdeal);
 [idealOutput, ~] = actuator_step([1e-3; 0; 0], cfgIdeal, stateIdeal, dt, struct('magneticField_b', magneticField_b));
 assert(strcmp(idealOutput.reactionWheel.model, 'ideal'), 'Reaction wheel ideal mode should remain available.');
 assert(strcmp(idealOutput.magnetorquer.model, 'ideal'), 'Magnetorquer ideal mode should remain available.');
+assert(strcmp(idealOutput.thruster.model, 'ideal'), 'Thruster ideal mode should remain available.');
 end
