@@ -10,6 +10,7 @@ addpath(genpath(fullfile(projectRoot, 'src', 'gnc')));
 addpath(genpath(fullfile(projectRoot, 'src', 'sensors')));
 addpath(genpath(fullfile(projectRoot, 'src', 'observers')));
 addpath(genpath(fullfile(projectRoot, 'src', 'control')));
+addpath(genpath(fullfile(projectRoot, 'src', 'actuators')));
 addpath(genpath(fullfile(projectRoot, 'src', 'disturbance')));
 addpath(genpath(fullfile(projectRoot, 'src', 'utils')));
 addpath(genpath(fullfile(projectRoot, 'scripts', 'analysis')));
